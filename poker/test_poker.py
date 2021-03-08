@@ -56,4 +56,5 @@ class TestPoker(TestCase):
     def test__player_draw(self):
         self.assertEqual(self.poker._player_draw(0), self.poker._player_stacks[0][-1])
 
-
+    def test__initial_deal(self):
+        pass

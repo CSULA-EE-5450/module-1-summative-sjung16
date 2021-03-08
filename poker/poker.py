@@ -50,7 +50,7 @@ class Poker(object):
         self._num_players = num_players
         self._card_stack = self._create_stack()
         self._player_stacks = [[] for _ in range(self._num_players)]
-        self._community_cards = []
+        self._community_stack = []
         self._player_best_hand = [[] for _ in range(self._num_players)]
 
     @staticmethod
@@ -294,10 +294,18 @@ class Poker(object):
         :return: The drawn card (already placed in the community card stack)
         """
         drawn_card = self._draw_card()
-        self._community_cards.append(drawn_card)
+        self._community_stack.append(drawn_card)
         return drawn_card
 
-    def initial_deal(self):
+    def _initial_deal(self):
         for player_idx in range(self._num_players):
             for _ in range(2):
                 self._player_draw(player_idx)
+
+    def _print_player_stack(self, player_idx: int):
+        player_stack = self._player_stacks[player_idx]
+        print(f"Player {player_idx}: {', '.join([str(card) for card in player_stack])}")
+
+    def _print_community_stack(self):
+        community_stack = self._community_stack
+        print(f"Community cards: {', '.join([str(card) for card in community_stack])}")
