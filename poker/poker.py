@@ -72,7 +72,7 @@ class Poker(object):
         :param combinations: List of combinations of cards
         :return: The best hand out of all the combinations
         """
-        hands = [{'hand': i, 'hand type': self._calculate_score(i).hand_type, 'score': self._calculate_score(i)}
+        hands = [{'hand': i, 'hand type': self._calculate_score(i)[0], 'score': self._calculate_score(i)[1]}
                  for i in combinations]
         ranked_hands = sorted(hands, key=lambda k: k['score'], reverse=True)  # Rank hands by value, descending
         return ranked_hands[0]
@@ -190,20 +190,24 @@ class Poker(object):
         n = sorted(numbers, reverse=True)
         return round((n[0] + n[1] / 100 + n[2] / 10000 + n[3] / 1000000 + n[4] / 100000000), 8)
 
-    def _calculate_score(self, stack: List[Card]) -> float:
+    def _calculate_score(self, stack: List[Card]) -> Tuple[str, float]:
         """
         Calculates the score of a given hand according to the following metrics:
         (Decimal points are given for remainder cards)
-            High Card: 0 to 14
-            Pair: 15 to 29
-            Two Pair: 30 to 44
-            Three of a Kind: 45 to 59
-            Straight: 60 to 74
-            Flush: 75 to 89
-            Full House: 90 to 104
-            Four of a Kind: 105 to 119
-            Straight Flush: 120 to 134
-            Royal Flush: 135
+
+            | Hand Type        | Score      |
+            | ---------------- | ---------- |
+            | High Card        | 0 to 14    |
+            | Pair             | 15 to 29   |
+            | Two Pair         | 30 to 44   |
+            | Three of a Kind  | 45 to 59   |
+            | Straight         | 60 to 74   |
+            | Flush            | 75 to 89   |
+            | Full House       | 90 to 104  |
+            | Four of a Kind   | 105 to 119 |
+            | Straight Flush   | 120 to 134 |
+            | Royal Flush      | 135        |
+
         :param stack: The 5 card hand
         :return: The score of the hand
         """
@@ -217,52 +221,40 @@ class Poker(object):
             if numbers == [14, 13, 12, 11, 10]:
                 hand_type = 'Royal Flush'
                 score = 135
-                print(f"{hand_type} (score: {score})")
             elif diff == 4 and max(repeated_num) == 1:
                 hand_type = 'Straight Flush'
                 score = 120 + max(numbers)
-                print(f"{hand_type} (score: {score})")
             elif 4 in repeated_num:
                 hand_type = 'Four of a Kind'
                 score = self._score_four_of_a_kind(numbers)
-                print(f"{hand_type} (score: {score})")
             elif sorted(repeated_num) == [2, 2, 3, 3, 3]:
                 hand_type = 'Full House'
                 score = self._score_full_house(numbers)
-                print(f"{hand_type} (score: {score})")
             else:
                 hand_type = 'Flush'
                 score = self._score_flush(numbers)
-                print(f"{hand_type} (score: {score})")
         elif 4 in repeated_num:
             hand_type = 'Four of a Kind'
             score = self._score_four_of_a_kind(numbers)
-            print(f"{hand_type} (score: {score})")
         elif sorted(repeated_num) == [2, 2, 3, 3, 3]:
             hand_type = 'Full House'
             score = self._score_full_house(numbers)
-            print(f"{hand_type} (score: {score})")
         elif 3 in repeated_num:
             hand_type = 'Three of a Kind'
             score = self._score_three_of_a_kind(numbers)
-            print(f"{hand_type} (score: {score})")
         elif repeated_num.count(2) == 4:
             hand_type = 'Two Pair'
             score = self._score_two_pair(numbers)
-            print(f"{hand_type} (score: {score})")
         elif repeated_num.count(2) == 2:
             hand_type = 'Pair'
             score = self._score_pair(numbers)
-            print(f"{hand_type} (score: {score})")
         elif diff == 4:
             hand_type = 'Straight'
             score = self._score_straight(numbers)
-            print(f"{hand_type} (score: {score})")
         else:
             hand_type = 'High Card'
             score = self._score_high_card(numbers)
-            print(f"{hand_type} (score: {score})")
-        return score
+        return hand_type, score
 
     def _create_stack(self) -> List[Card]:
         """

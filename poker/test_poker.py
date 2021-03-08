@@ -16,31 +16,34 @@ class TestPoker(TestCase):
                                                 Card('C', 2), Card('S', 3), Card('S', 12),
                                                 Card('S', 13)], 5)
         # Best hand should be Four of a Kind of Kings (13) with remaining card Queen (12)
-        self.assertEqual(self.poker._get_best_hand(combinations),
-                         {'hand': (Card(suit='S', number=13), Card(suit='D', number=13), Card(suit='H', number=13),
-                                   Card(suit='S', number=12), Card(suit='S', number=13)), 'score': 118.12})
+        best_hand = {'hand': (Card(suit='S', number=13), Card(suit='D', number=13), Card(suit='H', number=13),
+                              Card(suit='S', number=13), Card(suit='S', number=12)),
+                     'hand type': 'Four of a Kind',
+                     'score': 118.12}
+        # Wanted to assertDictEqual but the order of dict elements matters, so compared score only instead:
+        self.assertEqual(self.poker._get_best_hand(combinations)['score'], best_hand['score'])
 
     def test__calculate_score(self):
         self.assertEqual(self.poker._calculate_score([Card('S', 14), Card('S', 13), Card('S', 12),
-                                                      Card('S', 11), Card('S', 10)]), 135)          # Royal Flush
+                                                      Card('S', 11), Card('S', 10)]), ('Royal Flush', 135))
         self.assertEqual(self.poker._calculate_score([Card('S', 13), Card('S', 12), Card('S', 11),
-                                                      Card('S', 10), Card('S', 9)]), 133)           # Straight Flush
+                                                      Card('S', 10), Card('S', 9)]), ('Straight Flush', 133))
         self.assertEqual(self.poker._calculate_score([Card('S', 14), Card('S', 14), Card('S', 14),
-                                                      Card('S', 14), Card('S', 10)]), 119.10)       # Four of a Kind
+                                                      Card('S', 14), Card('S', 10)]), ('Four of a Kind', 119.10))
         self.assertEqual(self.poker._calculate_score([Card('S', 10), Card('S', 10), Card('S', 10),
-                                                      Card('S', 12), Card('S', 12)]), 100.12)       # Full House
+                                                      Card('S', 12), Card('S', 12)]), ('Full House', 100.12))
         self.assertEqual(self.poker._calculate_score([Card('S', 14), Card('S', 5), Card('S', 4),
-                                                      Card('S', 8), Card('S', 10)]), 75.14)         # Flush
+                                                      Card('S', 8), Card('S', 10)]), ('Flush', 75.14))
         self.assertEqual(self.poker._calculate_score([Card('S', 14), Card('D', 14), Card('H', 14),
-                                                      Card('S', 11), Card('C', 9)]), 59.1109)       # Three of a Kind
+                                                      Card('S', 11), Card('C', 9)]), ('Three of a Kind', 59.1109))
         self.assertEqual(self.poker._calculate_score([Card('S', 14), Card('D', 14), Card('H', 13),
-                                                      Card('S', 13), Card('C', 9)]), 44.1309)       # Two Pair
+                                                      Card('S', 13), Card('C', 9)]), ('Two Pair', 44.1309))
         self.assertEqual(self.poker._calculate_score([Card('S', 14), Card('D', 14), Card('H', 13),
-                                                      Card('S', 5), Card('C', 3)]), 29.130503)      # Pair
+                                                      Card('S', 5), Card('C', 3)]), ('Pair', 29.130503))
         self.assertEqual(self.poker._calculate_score([Card('S', 10), Card('D', 9), Card('H', 8),
-                                                      Card('S', 7), Card('C', 6)]), 75)             # Straight
+                                                      Card('S', 7), Card('C', 6)]), ('Straight', 75))
         self.assertEqual(self.poker._calculate_score([Card('S', 14), Card('D', 12), Card('H', 10),
-                                                      Card('S', 6), Card('C', 2)]), 14.12100602)    # High Card
+                                                      Card('S', 6), Card('C', 2)]), ('High Card', 14.12100602))
 
     def test__create_stack(self):
         self.assertEqual(len(self.poker._create_stack()), 52)
