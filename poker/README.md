@@ -24,9 +24,6 @@ remainder cards, decimal points will be given for the remaining cards (each subs
 the overall score).
 
 Todo:
-- calculate winner
-    - _get_best_hand for each player (store into self_player_best_hand)
-    - compare the scores, choose winner
 - run
 - main
     - Remember that player stacks should be private.

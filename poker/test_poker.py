@@ -4,7 +4,14 @@ from poker import Poker, Card
 
 class TestPoker(TestCase):
     def setUp(self) -> None:
-        self.poker = Poker()
+        """
+        Sample game and hands with 3 players
+        """
+        self.poker = Poker(3)
+        self.poker._community_stack = [Card('S', 13), Card('H', 12), Card('H', 10), Card('H', 9), Card('S', 6)]
+        self.poker._player_stacks = [[Card('S', 13), Card('S', 13)],    # Player 0: Three of a Kind
+                                     [Card('S', 13), Card('D', 12)],    # Player 1: Two Pair
+                                     [Card('H', 5), Card('H', 8)]]      # Player 2: Flush
 
     def test__calculate_score(self):
         self.assertEqual(self.poker._calculate_score([Card('S', 14), Card('S', 13), Card('S', 12),
@@ -42,7 +49,7 @@ class TestPoker(TestCase):
     def test__combinations(self):
         self.assertEqual(len(self.poker._combinations([Card('S', 2), Card('D', 2), Card('H', 2),
                                                        Card('C', 2), Card('S', 3), Card('S', 4),
-                                                       Card('S', 5)], 5)), 21)  # 7 choose 5
+                                                       Card('S', 5)], 5)), 21)  # 7 Choose 5 = 21
 
     def test__get_best_hand(self):
         combinations = self.poker._combinations([Card('S', 13), Card('D', 13), Card('H', 13),
@@ -56,9 +63,11 @@ class TestPoker(TestCase):
         self.assertEqual(self.poker._get_best_hand(combinations)['score'], best_hand['score'])
 
     def test__compute_winner(self):
+        """
+        From setUp:
         self.poker._community_stack = [Card('S', 13), Card('H', 12), Card('H', 10), Card('H', 9), Card('S', 6)]
         self.poker._player_stacks = [[Card('S', 13), Card('S', 13)],    # Player 0: Three of a Kind
                                      [Card('S', 13), Card('D', 12)],    # Player 1: Two Pair
                                      [Card('H', 5), Card('H', 8)]]      # Player 2: Flush
-        self.poker._num_players = 3
+        """
         self.assertEqual(self.poker._compute_winner(), 2)   # Player 2 should win with his Flush

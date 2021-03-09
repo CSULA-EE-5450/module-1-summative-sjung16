@@ -51,7 +51,8 @@ class Poker(object):
         self._card_stack = self._create_stack()
         self._player_stacks = [[] for _ in range(self._num_players)]
         self._community_stack = []
-        self._player_best_hand = [[] for _ in range(self._num_players)]
+        # self._best_hands = [[] for _ in range(self._num_players)]
+        self._best_hands = {}
 
     @staticmethod
     def _score_four_of_a_kind(numbers) -> float:
@@ -333,11 +334,44 @@ class Poker(object):
 
         :return: The winning player
         """
-        player_best_hands = {}
         for player_idx in range(self._num_players):
             seven_card_combination = self._player_stacks[player_idx] + self._community_stack
             five_card_combinations = self._combinations(seven_card_combination, 5)
-            player_best_hands[player_idx] = self._get_best_hand(five_card_combinations)
+            self._best_hands[player_idx] = self._get_best_hand(five_card_combinations)
         # Get the winning player's index from the nested dictionary, according to 'score':
-        winning_player_idx = max(player_best_hands, key=lambda x: player_best_hands[x].get('score'))
+        winning_player_idx = max(self._best_hands, key=lambda x: self._best_hands[x].get('score'))
         return winning_player_idx
+
+    def run(self):
+        print(POKER_INSTRUCTIONS['English']['START'])
+        self._initial_deal()
+        for player_idx in range(self._num_players):
+            self._print_player_stack(player_idx)
+        for i in range(4):
+            self._community_draw()
+        self._print_community_stack()   # The Flop
+        self._community_draw()
+        self._print_community_stack()   # The Turn
+        self._community_draw()
+        self._print_community_stack()   # The River
+        winner_player_idx = self._compute_winner()
+        print(f"The winner is Player {winner_player_idx}, with a {self._best_hands[winner_player_idx]['hand type']}!"
+              f" (score: {self._best_hands[winner_player_idx]['score']})")
+        return
+
+
+def main():
+    play_another = True
+    while play_another:
+        print(f"{POKER_INSTRUCTIONS['English']['WELCOME']}")
+        num_players_input = int(input(f"{POKER_INSTRUCTIONS['English']['NUM_PLAYERS']}"))
+        the_game = Poker(num_players_input)
+        the_game.run()
+        play_another_input = input(f"{POKER_INSTRUCTIONS['English']['PLAY_AGAIN']}")
+        if play_another_input != 'y':
+            play_another = False
+    return False
+
+
+if __name__ == '__main__':
+    main()
