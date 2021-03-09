@@ -238,11 +238,11 @@ class Poker(object):
 
         :return: stack of all card objects, shuffled.
         """
-        the_list = []
+        stack = []
         for suit in self._SUITS:
-            the_list.extend([Card(suit, num) for num in self._NUMBERS])
-        random.shuffle(the_list)
-        return the_list
+            stack.extend([Card(suit, num) for num in self._NUMBERS])
+        random.shuffle(stack)
+        return stack
 
     def _draw_card(self) -> Card:
         """
@@ -274,22 +274,32 @@ class Poker(object):
         return drawn_card
 
     def _initial_deal(self):
+        """
+        Draws two cards per player.
+        """
         for player_idx in range(self._num_players):
             for _ in range(2):
                 self._player_draw(player_idx)
 
     def _print_player_stack(self, player_idx: int):
+        """
+        Prints player_idx's stack.
+        :param player_idx: Player index
+        """
         player_stack = self._player_stacks[player_idx]
         print(f"Player {player_idx}: {', '.join([str(card) for card in player_stack])}")
 
     def _print_community_stack(self):
+        """
+        Prints the current community stack.
+        """
         community_stack = self._community_stack
         print(f"Community cards: {', '.join([str(card) for card in community_stack])}")
 
     @staticmethod
     def _combinations(stack: List[Card], length: int):
         """
-        Lists all combinations of the specified length from the stack (for Texas Hold'em, 7 choose 5).
+        Lists all combinations of the specified length from the stack (for Texas Hold'em, use 7 Choose 5).
 
         :param stack: The player's stack plus the community stack
         :param length: Length of the combination
@@ -305,12 +315,6 @@ class Poker(object):
         :param combinations: List of combinations of cards
         :return: The best hand out of all the combinations
         """
-        # hands = []
-        # for count, combination in enumerate(combinations):
-        #     hands = [{'player num': count,
-        #               'hand': combination,
-        #               'hand type': self._calculate_score(combination)[0],   # [0] refers to returned hand type
-        #               'score': self._calculate_score(combination)[1]}]      # [1] refers to returned score
         hands = [{'hand': i,
                   'hand type': self._calculate_score(i)[0],
                   'score': self._calculate_score(i)[1]}
@@ -320,14 +324,20 @@ class Poker(object):
         return best_hand
 
     def _compute_winner(self):
-        player_best_hands = []  # List of every player's best hand (list of dicts)
+        """
+        Creates a nested dictionary of each player and their best hand (along with their hand type and score), and
+        returns the winning player's index number.
+
+        player_best_hands = {player 1: {'hand': hand 1, 'hand type': hand type 1, 'score': score 1},
+                             player 2: {'hand': hand 2, 'hand type': hand type 2, 'score': score 2}, ...}
+
+        :return: The winning player
+        """
+        player_best_hands = {}
         for player_idx in range(self._num_players):
-            seven_card_combinations = self._player_stacks[player_idx] + self._community_stack
-            five_card_combinations = self._combinations(seven_card_combinations, 5)
-            player_best_hands.append(self._get_best_hand(five_card_combinations))
-        # ranked_best_hands = sorted(player_best_hands, key=lambda k: k['score'], reverse=True)
-        # winning_hand = ranked_best_hands[0]
-        # Don't sort the hands since that would disrupt the order
-        # Instead, grab the index of the highest score in list.
-        return
-        # Don't return winning hand; return the winning player number
+            seven_card_combination = self._player_stacks[player_idx] + self._community_stack
+            five_card_combinations = self._combinations(seven_card_combination, 5)
+            player_best_hands[player_idx] = self._get_best_hand(five_card_combinations)
+        # Get the winning player's index from the nested dictionary, according to 'score':
+        winning_player_idx = max(player_best_hands, key=lambda x: player_best_hands[x].get('score'))
+        return winning_player_idx

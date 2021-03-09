@@ -49,12 +49,16 @@ class TestPoker(TestCase):
                                                 Card('C', 2), Card('S', 3), Card('S', 12),
                                                 Card('S', 13)], 5)
         # Best hand should be Four of a Kind of Kings (13) with remaining card Queen (12)
-        best_hand = {'hand': (Card(suit='S', number=13), Card(suit='D', number=13), Card(suit='H', number=13),
-                              Card(suit='S', number=13), Card(suit='S', number=12)),
+        best_hand = {'hand': (Card('S', 13), Card('D', 13), Card('H', 13), Card('S', 13), Card('S', 12)),
                      'hand type': 'Four of a Kind',
                      'score': 118.12}
-        # Wanted to assertDictEqual but the order of dict elements matters, so compared score only instead:
+        # Wanted to assertDictEqual, but the order of dict elements matters; compared score only instead:
         self.assertEqual(self.poker._get_best_hand(combinations)['score'], best_hand['score'])
 
-    # def test__compute_winner(self):
-    #     player_1 =
+    def test__compute_winner(self):
+        self.poker._community_stack = [Card('S', 13), Card('H', 12), Card('H', 10), Card('H', 9), Card('S', 6)]
+        self.poker._player_stacks = [[Card('S', 13), Card('S', 13)],    # Player 0: Three of a Kind
+                                     [Card('S', 13), Card('D', 12)],    # Player 1: Two Pair
+                                     [Card('H', 5), Card('H', 8)]]      # Player 2: Flush
+        self.poker._num_players = 3
+        self.assertEqual(self.poker._compute_winner(), 2)   # Player 2 should win with his Flush
