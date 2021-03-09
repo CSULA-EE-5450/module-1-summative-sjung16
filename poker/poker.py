@@ -54,30 +54,6 @@ class Poker(object):
         self._player_best_hand = [[] for _ in range(self._num_players)]
 
     @staticmethod
-    def _combinations(stack: List[Card], length: int) -> List[Tuple[Card, ...]]:
-        """
-        Lists all combinations of the specified length from the stack (for Texas Hold'em, 7 choose 5).
-
-        :param stack: The player's stack plus the community stack
-        :param length: Length of the combination
-        :return: The list of all combinations of specified length
-        """
-        combination_list = list(itertools.combinations(stack, length))
-        return combination_list
-
-    def _get_best_hand(self, combinations) -> Dict[str, float]:
-        """
-        Takes in a list of combinations of cards, ranks them according to their score, and returns the best hand.
-
-        :param combinations: List of combinations of cards
-        :return: The best hand out of all the combinations
-        """
-        hands = [{'hand': i, 'hand type': self._calculate_score(i)[0], 'score': self._calculate_score(i)[1]}
-                 for i in combinations]
-        ranked_hands = sorted(hands, key=lambda k: k['score'], reverse=True)  # Rank hands by value, descending
-        return ranked_hands[0]
-
-    @staticmethod
     def _score_four_of_a_kind(numbers) -> float:
         """
         Takes a hand of a Four of a Kind and calculates its score.
@@ -309,3 +285,49 @@ class Poker(object):
     def _print_community_stack(self):
         community_stack = self._community_stack
         print(f"Community cards: {', '.join([str(card) for card in community_stack])}")
+
+    @staticmethod
+    def _combinations(stack: List[Card], length: int):
+        """
+        Lists all combinations of the specified length from the stack (for Texas Hold'em, 7 choose 5).
+
+        :param stack: The player's stack plus the community stack
+        :param length: Length of the combination
+        :return: The list of all combinations of specified length
+        """
+        combination_list = list(itertools.combinations(stack, length))
+        return combination_list
+
+    def _get_best_hand(self, combinations) -> Dict[str, float]:
+        """
+        Takes in a list of combinations of cards, ranks them according to their score, and returns the best hand.
+
+        :param combinations: List of combinations of cards
+        :return: The best hand out of all the combinations
+        """
+        # hands = []
+        # for count, combination in enumerate(combinations):
+        #     hands = [{'player num': count,
+        #               'hand': combination,
+        #               'hand type': self._calculate_score(combination)[0],   # [0] refers to returned hand type
+        #               'score': self._calculate_score(combination)[1]}]      # [1] refers to returned score
+        hands = [{'hand': i,
+                  'hand type': self._calculate_score(i)[0],
+                  'score': self._calculate_score(i)[1]}
+                 for i in combinations]
+        ranked_hands = sorted(hands, key=lambda k: k['score'], reverse=True)  # Rank hands by value, descending
+        best_hand = ranked_hands[0]
+        return best_hand
+
+    def _compute_winner(self):
+        player_best_hands = []  # List of every player's best hand (list of dicts)
+        for player_idx in range(self._num_players):
+            seven_card_combinations = self._player_stacks[player_idx] + self._community_stack
+            five_card_combinations = self._combinations(seven_card_combinations, 5)
+            player_best_hands.append(self._get_best_hand(five_card_combinations))
+        # ranked_best_hands = sorted(player_best_hands, key=lambda k: k['score'], reverse=True)
+        # winning_hand = ranked_best_hands[0]
+        # Don't sort the hands since that would disrupt the order
+        # Instead, grab the index of the highest score in list.
+        return
+        # Don't return winning hand; return the winning player number
