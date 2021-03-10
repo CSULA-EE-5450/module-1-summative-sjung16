@@ -24,9 +24,14 @@ remainder cards, decimal points will be given for the remaining cards (each subs
 the overall score).
 
 ## Betting
-The betting system will be a simplified version of a normal betting system. After the initial deal Player 0 can:
-- Bet: If Player 0 chooses Bet, the rest of the players will automatically call the bet amount.
-- Check: If Player 0 chooses Check, the rest of the players will also check.
+The betting system will be a simplified version of a normal betting system. After the initial deal, Player 0 can:
+- `Bet`: If Player 0 chooses `Bet`, the rest of the players will automatically `Call` the bet amount, and then the game 
+  will continue on to the next stage.
+- `Check`: If Player 0 chooses `Check`, the turn will go to the next player, Player 1. Player 1 will have the same 
+  choices of either `Bet` or `Check`, just as Player 0 did. The turns will continue in this fashion until either one of 
+  the players `Bet`s or everyone `Check`s. Then, the game will continue on to the next stage.
 
-Essentially, Player 0 is the main player of the game and everyone else must follow suit. I wanted to implement the real
-betting system, but it was a bit too complex for the scope of this project. I may try to implement it in the future.
+
+## TODO
+- Create game database
+- Create user database
