@@ -23,8 +23,10 @@ will beat a hand with a high card of 11 (Jack). To further distinguish the score
 remainder cards, decimal points will be given for the remaining cards (each subsequent card weighing less and less to 
 the overall score).
 
-Todo:
-- run
-- main
-    - Remember that player stacks should be private.
-    - For now, make it public, but later make it private with FastAPI
+## Betting
+The betting system will be a simplified version of a normal betting system. After the initial deal Player 0 can:
+- Bet: If Player 0 chooses Bet, the rest of the players will automatically call the bet amount.
+- Check: If Player 0 chooses Check, the rest of the players will also check.
+
+Essentially, Player 0 is the main player of the game and everyone else must follow suit. I wanted to implement the real
+betting system, but it was a bit too complex for the scope of this project. I may try to implement it in the future.

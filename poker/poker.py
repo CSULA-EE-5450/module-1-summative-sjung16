@@ -5,9 +5,11 @@ import itertools
 
 POKER_INSTRUCTIONS = {
     'English': {
-        'WELCOME': "Welcome to Texas Hold'em!",
+        'WELCOME': "Welcome to Texas Hold'em! ",
         'NUM_PLAYERS': 'How many players? ',
         'START': 'Starting game... ',
+        'PLAYER_MAIN': 'Type b to bet, or k to check: ',
+        'PLAYER_BET_AMT': 'Type amount to bet: ',
         'PLAY_AGAIN': 'Type y to play another game: '
     }
 }
@@ -39,7 +41,7 @@ class Poker(object):
     """
     Poker game object.
     """
-    def __init__(self, num_players: int = 2):
+    def __init__(self, num_players: int = 2, cash_amt: int = 1000):
         """
         Constructor for the poker game object.
 
@@ -51,8 +53,12 @@ class Poker(object):
         self._card_stack = self._create_stack()
         self._player_stacks = [[] for _ in range(self._num_players)]
         self._community_stack = []
-        # self._best_hands = [[] for _ in range(self._num_players)]
         self._best_hands = {}
+        self._player_money = [cash_amt for _ in range(self._num_players)]
+        self._the_pot = 0
+        self._bet_amount = 0
+        # self._player_dones = [False for _ in range(self._num_players)]
+        # self._current_turn = 0
 
     @staticmethod
     def _score_four_of_a_kind(numbers) -> float:
@@ -297,6 +303,13 @@ class Poker(object):
         community_stack = self._community_stack
         print(f"Community cards: {', '.join([str(card) for card in community_stack])}")
 
+    def _print_money_standing(self, num_players: int):
+        """
+        Prints every player's money standing
+        """
+        for player_idx in range(num_players):
+            print(f"Player {player_idx} has ${self._player_money[player_idx]}. ")
+
     @staticmethod
     def _combinations(stack: List[Card], length: int):
         """
@@ -324,7 +337,7 @@ class Poker(object):
         best_hand = ranked_hands[0]
         return best_hand
 
-    def _compute_winner(self):
+    def _compute_winner(self) -> int:
         """
         Creates a nested dictionary of each player and their best hand (along with their hand type and score), and
         returns the winning player's index number.
@@ -342,21 +355,75 @@ class Poker(object):
         winning_player_idx = max(self._best_hands, key=lambda x: self._best_hands[x].get('score'))
         return winning_player_idx
 
+    def _main_player_choice(self, player_0: int):
+        """
+        Asks the player for the choice.
+
+        :param player_0: Player index
+        :return: Player is done betting/playing
+        """
+        player_input = 'g'
+        while player_input not in ('b', 'k'):
+            player_input = input(f"Player {player_0}: {POKER_INSTRUCTIONS['English']['PLAYER_MAIN']} ")
+            if player_input == 'b':
+                self._bet_amount = int(input(f"Player {player_0}: {POKER_INSTRUCTIONS['English']['PLAYER_BET_AMT']} "))
+                self._player_money[player_0] -= self._bet_amount
+                self._the_pot += self._bet_amount
+                print(f"Player {player_0} bets for ${self._bet_amount}. Pot: ${self._the_pot}. "
+                      f"Player {player_0} now has ${self._player_money[player_0]} ")
+                for player_idx in range(1, self._num_players):
+                    self._other_player_call(player_idx)
+                return
+            elif player_input == 'k':
+                print(f"Player {player_0} checks. Pot: ${self._the_pot}. ")
+                for player_idx in range(1, self._num_players):
+                    self._other_player_check(player_idx)
+                return
+
+    def _other_player_call(self, player_idx: int):
+        """
+        The player calls Player 0's bet.
+
+        :param player_idx: Player index
+        :return: Player is done betting/playing
+        """
+        self._player_money[player_idx] -= self._bet_amount
+        self._the_pot += self._bet_amount
+        print(f"Player {player_idx} has called. Pot: ${self._the_pot}. "
+              f"Player {player_idx} now has ${self._player_money[player_idx]}. ")
+
+    def _other_player_check(self, player_idx: int):
+        """
+        The player checks.
+
+        :param player_idx: Player index
+        :return: Player is done betting/playing
+        """
+        print(f"Player {player_idx} checks. Pot: ${self._the_pot}. ")
+
     def run(self):
         print(POKER_INSTRUCTIONS['English']['START'])
+        self._print_money_standing(self._num_players)
         self._initial_deal()
         for player_idx in range(self._num_players):
             self._print_player_stack(player_idx)
-        for i in range(4):
+        self._main_player_choice(0)
+        for i in range(3):
             self._community_draw()
         self._print_community_stack()   # The Flop
+        self._main_player_choice(0)
         self._community_draw()
         self._print_community_stack()   # The Turn
+        self._main_player_choice(0)
         self._community_draw()
         self._print_community_stack()   # The River
+        self._main_player_choice(0)
         winner_player_idx = self._compute_winner()
-        print(f"The winner is Player {winner_player_idx}, with a {self._best_hands[winner_player_idx]['hand type']}!"
-              f" (score: {self._best_hands[winner_player_idx]['score']})")
+        self._player_money[winner_player_idx] += self._the_pot
+        print(f"Player {winner_player_idx} wins ${self._the_pot}, "
+              f"with a {self._best_hands[winner_player_idx]['hand type']}! "
+              f"(score: {self._best_hands[winner_player_idx]['score']}) ")
+        self._print_money_standing(self._num_players)
         return
 
 
