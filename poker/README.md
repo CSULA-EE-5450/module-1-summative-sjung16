@@ -30,8 +30,3 @@ The betting system will be a simplified version of a normal betting system. Afte
 - `Check`: If Player 0 chooses `Check`, the turn will go to the next player, Player 1. Player 1 will have the same 
   choices of either `Bet` or `Check`, just as Player 0 did. The turns will continue in this fashion until either one of 
   the players `Bet`s or everyone `Check`s. Then, the game will continue on to the next stage.
-
-
-## TODO
-- Create game database
-- Create user database

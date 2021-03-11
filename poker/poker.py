@@ -41,11 +41,12 @@ class Poker(object):
     """
     Poker game object.
     """
-    def __init__(self, num_players: int = 2, cash_amt: int = 1000):
+    def __init__(self, num_players: int = 2, player_cash_amt: int = 1000):
         """
         Constructor for the poker game object.
 
         :param num_players: number of players in this game; defaults to 2 players
+        :param player_cash_amt: amount of money each player starts with
         """
         self._SUITS = ("S", "H", "C", "D")
         self._NUMBERS = list(range(2, 15))
@@ -54,7 +55,7 @@ class Poker(object):
         self._player_stacks = [[] for _ in range(self._num_players)]
         self._community_stack = []
         self._best_hands = {}
-        self._player_money = [cash_amt for _ in range(self._num_players)]
+        self._player_money = [player_cash_amt for _ in range(self._num_players)]
         self._the_pot = 0
         self._bet_amount = 0
         self._player_dones = [False for _ in range(self._num_players)]
@@ -370,7 +371,8 @@ class Poker(object):
                 self._the_pot += self._bet_amount
                 print(f"Player {player_idx} bets for ${self._bet_amount}. Pot: ${self._the_pot}. "
                       f"Player {player_idx} now has ${self._player_money[player_idx]} ")
-                for idx in range(self._num_players):  # Automatically 'Call' for everyone but player_idx
+                # Automatically 'Call' for everyone but player_idx
+                for idx in range(self._num_players):
                     if idx == player_idx:
                         continue
                     else:
@@ -382,17 +384,6 @@ class Poker(object):
             elif player_input == 'k':
                 print(f"Player {player_idx} checks. Pot: ${self._the_pot}. ")
                 return 'check'
-
-    # def _other_players_call(self, player_idx: int):
-    #     """
-    #     The other players automatically call the betting player's bet.
-    #
-    #     :param player_idx: Player index
-    #     """
-    #     self._player_money[player_idx] -= self._bet_amount
-    #     self._the_pot += self._bet_amount
-    #     print(f"Player {player_idx} has called. Pot: ${self._the_pot}. "
-    #           f"Player {player_idx} now has ${self._player_money[player_idx]}. ")
 
     def run(self):
         print(POKER_INSTRUCTIONS['English']['START'])
@@ -462,7 +453,7 @@ class Poker(object):
                         self._player_dones[player_idx] = True
                         continue
             break
-
+        # Winner computation:
         winner_player_idx = self._compute_winner()
         self._player_money[winner_player_idx] += self._the_pot
         print(f"Player {winner_player_idx} wins ${self._the_pot}, "

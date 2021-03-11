@@ -7,7 +7,7 @@ class TestPoker(TestCase):
         """
         Sample game and hands with 3 players
         """
-        self.poker = Poker(num_players=3, cash_amt=1000)
+        self.poker = Poker(num_players=3, player_cash_amt=1000)
         self.poker._community_stack = [Card('S', 13), Card('H', 12), Card('H', 10), Card('H', 9), Card('S', 6)]
         self.poker._player_stacks = [[Card('S', 13), Card('S', 13)],    # Player 0: Three of a Kind
                                      [Card('S', 13), Card('D', 12)],    # Player 1: Two Pair
