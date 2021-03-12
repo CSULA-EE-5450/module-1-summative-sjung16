@@ -2,13 +2,23 @@ from uuid import uuid4
 from typing import List, Tuple, Dict, Union
 from poker.poker import Poker
 import asyncio
+from user_db import UserDB
+
+
+@dataclass
+class BlackjackGameInfo:
+    num_players: int
+    owner: str
+    players: List[str]
+    termination_password: str
 
 
 class AsyncPokerGameDB(object):
-    def __init__(self):
+    def __init__(self, user_db: UserDB):
         self._current_games: Dict[str, Poker] = {}
         self._termination_passwords: Dict[str, str] = {}
         self._QUERY_TIME: float = 0.05
+        self._user_db = user_db
 
     async def add_game(self, num_players: int = 2, starting_cash: int = 1000) -> Tuple[str, str]:
         """
