@@ -41,12 +41,12 @@ class Poker(object):
     """
     Poker game object.
     """
-    def __init__(self, num_players: int = 2, player_cash_amt: int = 1000):
+    def __init__(self, num_players: int = 2, starting_cash: int = 1000):
         """
         Constructor for the poker game object.
 
         :param num_players: number of players in this game; defaults to 2 players
-        :param player_cash_amt: amount of money each player starts with
+        :param starting_cash: amount of money each player starts with
         """
         self._SUITS = ("S", "H", "C", "D")
         self._NUMBERS = list(range(2, 15))
@@ -55,7 +55,7 @@ class Poker(object):
         self._player_stacks = [[] for _ in range(self._num_players)]
         self._community_stack = []
         self._best_hands = {}
-        self._player_money = [player_cash_amt for _ in range(self._num_players)]
+        self._player_money = [starting_cash for _ in range(self._num_players)]
         self._the_pot = 0
         self._bet_amount = 0
         self._player_dones = [False for _ in range(self._num_players)]

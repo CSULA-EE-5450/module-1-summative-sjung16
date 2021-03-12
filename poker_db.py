@@ -10,18 +10,18 @@ class AsyncPokerGameDB(object):
         self._termination_passwords: Dict[str, str] = {}
         self._QUERY_TIME: float = 0.05
 
-    async def add_game(self, num_players: int = 2, player_cash_amt: int = 1000) -> Tuple[str, str]:
+    async def add_game(self, num_players: int = 2, starting_cash: int = 1000) -> Tuple[str, str]:
         """
         Asks the database to create a new game.
 
         :param num_players: number of players
-        :param player_cash_amt: amount of money each player starts with
+        :param starting_cash: amount of money each player starts with
         :return: the UUID (universally-unique ID) of the game
         """
         await asyncio.sleep(self._QUERY_TIME)  # simulate query time
         game_uuid = str(uuid4())
         game_term_password = str(uuid4())
-        self._current_games[game_uuid] = Poker(num_players, player_cash_amt)
+        self._current_games[game_uuid] = Poker(num_players, starting_cash)
         self._termination_passwords[game_uuid] = game_term_password
         return game_uuid, game_term_password
 

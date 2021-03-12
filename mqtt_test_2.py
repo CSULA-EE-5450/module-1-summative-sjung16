@@ -42,13 +42,10 @@ async def advanced_example():
         await client.subscribe("floors/#")
 
         # Publish a random value to each of these topics
-        temp = 50
-        string_test = "floors/"+str(temp)+"/humidity"
         topics = (
             "floors/basement/humidity",
             "floors/rooftop/humidity",
             "floors/rooftop/illuminance",
-            string_test
             # 👉 Try to add more topics!
         )
         task = asyncio.create_task(post_to_topics(client, topics))
