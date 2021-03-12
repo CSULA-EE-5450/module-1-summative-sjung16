@@ -3,12 +3,12 @@ from typing import List, Tuple, Dict, Union
 from poker.poker import Poker
 import asyncio
 from user_db import UserDB
+from dataclasses import dataclass
 
 
 @dataclass
-class BlackjackGameInfo:
+class PokerGameInfo:
     num_players: int
-    owner: str
     players: List[str]
     termination_password: str
 
@@ -16,11 +16,11 @@ class BlackjackGameInfo:
 class AsyncPokerGameDB(object):
     def __init__(self, user_db: UserDB):
         self._current_games: Dict[str, Poker] = {}
-        self._termination_passwords: Dict[str, str] = {}
+        self._current_games_info: Dict[str, PokerGameInfo] = {}
         self._QUERY_TIME: float = 0.05
         self._user_db = user_db
 
-    async def add_game(self, num_players: int = 2, starting_cash: int = 1000) -> Tuple[str, str]:
+    async def add_game(self, num_players: int, starting_cash: int = 1000) -> Tuple[str, str]:
         """
         Asks the database to create a new game.
 
@@ -32,7 +32,10 @@ class AsyncPokerGameDB(object):
         game_uuid = str(uuid4())
         game_term_password = str(uuid4())
         self._current_games[game_uuid] = Poker(num_players, starting_cash)
-        self._termination_passwords[game_uuid] = game_term_password
+        self._current_games_info[game_uuid] = PokerGameInfo(
+            num_players,
+            list(),
+            game_term_password)
         return game_uuid, game_term_password
 
     async def list_games(self) -> List[Tuple[str, int]]:
@@ -42,33 +45,23 @@ class AsyncPokerGameDB(object):
         :return: list of (game_id, number of players in game)
         """
         await asyncio.sleep(self._QUERY_TIME)  # simulate query time
-        return [(game_id, game.num_players) for game_id, game in self._current_games.items()]
+        return [(game_id, game._num_players) for game_id, game in self._current_games.items()]
 
     async def get_game(self, game_id: str) -> Union[Poker, None]:
         """
         Asks the database for a pointer to a specific game.
 
         :param game_id: the UUID of the specific game
-        :return: None if the game was not found, otherwise pointer to the Blackjack object
+        :return: None if the game was not found, otherwise pointer to the Poker object
         """
         await asyncio.sleep(self._QUERY_TIME)  # simulate query time
         return self._current_games.get(game_id, None)
 
-    async def del_game(self, game_id: str, term_pass: str) -> bool:
+    async def get_game_info(self, game_id: str):
         """
-        Asks the database to terminate a specific game.
+        Asks the database for num_players, list of players, and termination password for a specific game.
 
         :param game_id: the UUID of the specific game
-        :param term_pass: the termination password for the game
-        :return: False or exception if not found, True if success
+        :return: list of players in the game game_id
         """
-        try:
-            await asyncio.sleep(self._QUERY_TIME)  # simulate query time
-            if self._termination_passwords[game_id] == term_pass:
-                del self._current_games[game_id]
-                return True
-            # else:
-                # raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                # detail=f"Incorrect termination password.")
-        except KeyError:
-            return False
+        return self._current_games_info[game_id]
