@@ -20,7 +20,7 @@ class AsyncPokerGameDB(object):
         self._QUERY_TIME: float = 0.05
         self._user_db = user_db
 
-    async def add_game(self, room_number: str, num_players: int, starting_cash: int = 1000) -> str:
+    async def add_game(self, room_number: str, num_players: int = 2, starting_cash: int = 1000) -> str:
         """
         Asks the database to create a new game.
 

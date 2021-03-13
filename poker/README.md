@@ -1,6 +1,7 @@
 # Welcome to Texas Hold'em!
-Texas Hold'em is a popular variant of Poker. The game requires at least two players. The rules of the game are outside 
-the scope of this project, and it will be assumed that you already know how the game works.
+Texas Hold'em is a popular variant of Poker. The game requires at least two players.
+
+[How to play Texas Hold'em](https://bicyclecards.com/how-to-play/texas-holdem-poker/)
 
 ## Scoring
 The score will be calculated to the following metrics:

@@ -16,20 +16,40 @@ async def message_handler():
         async with client.unfiltered_messages() as messages:
             async for message in messages:
                 message_str = message.payload.decode()
+
                 if message_str.startswith("create_user"):
                     # Delete the command portion of the message ("create_user")
                     message_params = message_str.replace("create_user", '')
                     # Then feed the remaining message of only the parameter(s) (username).
                     await create_user(client, message_params)
+
                 elif message_str.startswith("create_game"):
                     message_params = message_str.replace("create_game", '')
                     await create_game(client, message_params)
+
                 elif message_str.startswith("add_player_to_game"):
                     message_params = message_str.replace("add_player_to_game", '')
                     await add_player_to_game(client, message_params)
+
                 elif message_str.startswith("init_game"):
                     message_params = message_str.replace("init_game", '')
                     await init_game(client, message_params)
+
+                elif message_str.startswith("bet"):
+                    message_params = message_str.replace("bet", '')
+                    await bet(client, message_params)
+
+                elif message_str.startswith("the_flop"):
+                    message_params = message_str.replace("the_flop", '')
+                    await the_flop(client, message_params)
+
+                elif message_str.startswith("the_turn"):
+                    message_params = message_str.replace("the_turn", '')
+                    await the_turn(client, message_params)
+
+                elif message_str.startswith("the_river"):
+                    message_params = message_str.replace("the_river", '')
+                    await the_river(client, message_params)
 
 
 async def create_user(client, message_params):
@@ -59,14 +79,13 @@ async def create_user(client, message_params):
 async def create_game(client, message_params):
     """
     Creates a game according to user input parameters, and adds the game to the game database.
-    The user must publish a message of his desired username under the designated topic and message format below.
 
     Topic: "game_command"
     Message format: "create_game game_number, num_players, starting_cash" (Important: the three parameters MUST be
                     separated by a comma!"
 
-    Example: User publishes string message "create_game 3, 5, 2000" under topic "game_command/create" to create new game
-             with game_number=3, num_players=5, and starting_cash=2000
+    Example: User publishes string message "create_game 2, 3, 5000" under topic "game_command/create" to create new game
+             with room_number=2, num_players=3, and starting_cash=5000
 
     :param client: The MQTT client
     :param message_params: The parameters portion of the message string
@@ -90,10 +109,9 @@ async def create_game(client, message_params):
 async def add_player_to_game(client, message_params):
     """
     Adds a player to a game that exists in the database.
-    The user must publish a message of his desired username under the designated topic and message format below.
 
     Topic: "game_command"
-    Message format: "add_player_to_game game_number, username" (Important: the three parameters MUST be
+    Message format: "add_player_to_game game_number, username" (Important: the parameters MUST be
                     separated by a comma!"
 
     Example: User publishes string message "add_player_to_game 3, john_doe" under topic "game_command"
@@ -166,14 +184,128 @@ async def init_game(client, room_number):
     player_list = game_info.players
     player_stacks = the_game.get_player_stacks()
     player_cash = the_game.get_player_cash()
+
     for player in player_list:
         player_idx = await get_player_idx(room_number, player)
         await client.publish("game_rooms/" + room_number + "/players/" + player + "/hand",
                              str(player_stacks[player_idx]), qos=1)
         await client.publish("game_rooms/" + room_number + "/players/" + player + "/cash",
                              "$"+str(player_cash[player_idx]), qos=1)
+
     await client.publish("game_rooms/" + room_number + "/community_cards_and_pot/the_pot",
                          "$0", qos=1)
+
+
+async def bet(client, message_params):
+    """
+    Deals the initial hands for each player.
+
+    Topic: "game_command"
+    Message format: "bet room_number, username, bet_amount"
+
+    Example: To do the initial deal for game room 2, the user would publish "init_game 2" under topic "game_command".
+
+    :param client: The MQTT client
+    :param message_params: The parameters portion of the message string
+    """
+    # Split message_params into three parameters
+    message_split = message_params.split(",")
+    room_number = message_split[0]
+    username = message_split[1]
+    bet_amount = int(message_split[2])
+
+    # Get the necessary game information
+    the_game = await get_game(room_number)
+    player_idx = await get_player_idx(room_number, username)
+    player_cash = the_game.get_player_cash()
+
+    # Money flow
+    player_cash[player_idx] -= bet_amount
+    the_game.the_pot += bet_amount
+    await client.publish("game_rooms/" + room_number + "/players/" + username + "/cash",
+                         "$" + str(player_cash[player_idx]), qos=1)
+    await client.publish("game_rooms/" + room_number + "/community_cards_and_pot/the_pot",
+                         str(the_game.the_pot), qos=1)
+
+
+async def the_flop(client, room_number):
+    """
+    Draw three community cards to reveal the flop.
+
+    Topic: "game_command"
+    Message format: "the_flop room_number"
+
+    Example: To reveal the flop for game room 2, the user would publish "the_flop 2" under topic "game_command".
+
+    :param client: The MQTT client
+    :param room_number: The room number
+    """
+    the_game = await get_game(room_number)
+    for _ in range(3):
+        the_game.community_draw()
+    community_stack = the_game.get_community_stack()
+    await client.publish("game_rooms/" + room_number + "/community_cards_and_pot/community_cards",
+                         str(community_stack), qos=1)
+
+
+async def the_turn(client, room_number):
+    """
+    Draw one community card to reveal the turn.
+
+    Topic: "game_command"
+    Message format: "the_flop room_number"
+
+    Example: To reveal the flop for game room 2, the user would publish "the_flop 2" under topic "game_command".
+
+    :param client: The MQTT client
+    :param room_number: The room number
+    """
+    the_game = await get_game(room_number)
+    the_game.community_draw()
+    community_stack = the_game.get_community_stack()
+    await client.publish("game_rooms/" + room_number + "/community_cards_and_pot/community_cards",
+                         str(community_stack), qos=1)
+
+
+async def the_river(client, room_number):
+    """
+    Draw one community card to reveal the river and computes the winner. The pot goes to the winner.
+
+    Topic: "game_command"
+    Message format: "the_flop room_number"
+
+    Example: To reveal the flop for game room 2, the user would publish "the_flop 2" under topic "game_command".
+
+    :param client: The MQTT client
+    :param room_number: The room number
+    """
+    the_game = await get_game(room_number)
+    the_game.community_draw()
+    community_stack = the_game.get_community_stack()
+    await client.publish("game_rooms/" + room_number + "/community_cards_and_pot/community_cards",
+                         str(community_stack), qos=1)
+    # Compute winner
+    game_info = await POKER_DB.get_game_info(room_number)
+    player_list = game_info.players
+    winning_player_idx = the_game.compute_winner()
+    winning_player_username = player_list[winning_player_idx]
+    player_cash = the_game.get_player_cash()
+    best_hands = the_game.get_best_hands()
+    player_stacks = the_game.get_player_stacks()
+
+    # Money flow
+    player_cash[winning_player_idx] += the_game.the_pot
+    await client.publish("game_rooms/" + room_number + "/players/" + winning_player_username + "/hand",
+                         str(player_stacks[winning_player_idx]) + "   WINNER! Wins $" +
+                         str(the_game.the_pot) + " with hand type " +
+                         str(best_hands[winning_player_idx]['hand type']) + " (score: " +
+                         str(best_hands[winning_player_idx]['score']) + ")", qos=1)
+    await client.publish("game_rooms/" + room_number + "/players/" + winning_player_username + "/cash",
+                         "$" + str(player_cash[winning_player_idx]), qos=1)
+    # Clear the pot
+    the_game.the_pot = 0
+    await client.publish("game_rooms/" + room_number + "/community_cards_and_pot/the_pot",
+                         "$" + str(the_game.the_pot), qos=1)
 
 
 async def main():

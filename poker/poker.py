@@ -56,7 +56,7 @@ class Poker(object):
         self._community_stack = []
         self._best_hands = {}
         self._player_cash = [starting_cash for _ in range(self._num_players)]
-        self._the_pot = 0
+        self.the_pot = 0
         self._bet_amount = 0
         self._player_dones = [False for _ in range(self._num_players)]
 
@@ -270,7 +270,7 @@ class Poker(object):
         self._player_stacks[player_idx].append(drawn_card)
         return drawn_card
 
-    def _community_draw(self) -> Card:
+    def community_draw(self) -> Card:
         """
         Draw a community card and adds it to the community card stack.
 
@@ -312,6 +312,12 @@ class Poker(object):
     def get_player_cash(self):
         return self._player_cash
 
+    def get_the_pot(self):
+        return self.the_pot
+
+    def get_best_hands(self):
+        return self._best_hands
+
     def _print_cash_standing(self, num_players: int):
         """
         Prints every player's cash standing
@@ -346,7 +352,7 @@ class Poker(object):
         best_hand = ranked_hands[0]
         return best_hand
 
-    def _compute_winner(self) -> int:
+    def compute_winner(self) -> int:
         """
         Creates a nested dictionary of each player and their best hand (along with their hand type and score), and
         returns the winning player's index number.
@@ -377,7 +383,7 @@ class Poker(object):
                 self._bet_amount = int(input(f"Player {player_idx}: "
                                              f"{POKER_INSTRUCTIONS['English']['PLAYER_BET_AMT']} "))
                 self._player_cash[player_idx] -= self._bet_amount
-                self._the_pot += self._bet_amount
+                self.the_pot += self._bet_amount
                 print(f"Player {player_idx} bets for ${self._bet_amount}. Pot: ${self._the_pot}. "
                       f"Player {player_idx} now has ${self._player_cash[player_idx]} ")
                 # Automatically 'Call' for everyone but player_idx
@@ -386,12 +392,12 @@ class Poker(object):
                         continue
                     else:
                         self._player_cash[idx] -= self._bet_amount
-                        self._the_pot += self._bet_amount
-                        print(f"Player {idx} has called. Pot: ${self._the_pot}. "
+                        self.the_pot += self._bet_amount
+                        print(f"Player {idx} has called. Pot: ${self.the_pot}. "
                               f"Player {idx} now has ${self._player_cash[idx]}. ")
                 return 'bet'
             elif player_input == 'k':
-                print(f"Player {player_idx} checks. Pot: ${self._the_pot}. ")
+                print(f"Player {player_idx} checks. Pot: ${self.the_pot}. ")
                 return 'check'
 
     def run(self):
@@ -418,7 +424,7 @@ class Poker(object):
         """ **************************** THE FLOP **************************** """
 
         for i in range(3):
-            self._community_draw()
+            self.community_draw()
         self._print_community_stack()
         while not all(self._player_dones):                          # While not everyone is done
             for player_idx in range(self._num_players):             # For each player
@@ -434,7 +440,7 @@ class Poker(object):
 
         """ **************************** THE TURN **************************** """
 
-        self._community_draw()
+        self.community_draw()
         self._print_community_stack()   # The Turn
         while not all(self._player_dones):                          # While not everyone is done
             for player_idx in range(self._num_players):             # For each player
@@ -450,7 +456,7 @@ class Poker(object):
 
         """ *************************** THE RIVER *************************** """
 
-        self._community_draw()
+        self.community_draw()
         self._print_community_stack()
         while not all(self._player_dones):                          # While not everyone is done
             for player_idx in range(self._num_players):             # For each player
@@ -463,9 +469,9 @@ class Poker(object):
                         continue
             break
         # Winner computation:
-        winner_player_idx = self._compute_winner()
-        self._player_cash[winner_player_idx] += self._the_pot
-        print(f"Player {winner_player_idx} wins ${self._the_pot}, "
+        winner_player_idx = self.compute_winner()
+        self._player_cash[winner_player_idx] += self.the_pot
+        print(f"Player {winner_player_idx} wins ${self.the_pot}, "
               f"with a {self._best_hands[winner_player_idx]['hand type']}! "
               f"(score: {self._best_hands[winner_player_idx]['score']}) ")
         self._print_cash_standing(self._num_players)

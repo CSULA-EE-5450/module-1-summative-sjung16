@@ -70,4 +70,4 @@ class TestPoker(TestCase):
                                      [Card('S', 13), Card('D', 12)],    # Player 1: Two Pair
                                      [Card('H', 5), Card('H', 8)]]      # Player 2: Flush
         """
-        self.assertEqual(self.poker._compute_winner(), 2)   # Player 2 should win with his Flush
+        self.assertEqual(self.poker.compute_winner(), 2)   # Player 2 should win with his Flush
