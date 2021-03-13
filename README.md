@@ -139,7 +139,8 @@ the_turn 2
 the_river 2
 ```
 
-The game results will vary game to game of course, but the result should look something like this:
+The game results will vary game to game of course, but the result should look something like this, showing the
+winner, the winning hand type, and its score:
 
 ![img_3.png](img_3.png)
 
