@@ -280,7 +280,7 @@ class Poker(object):
         self._community_stack.append(drawn_card)
         return drawn_card
 
-    def _initial_deal(self):
+    def initial_deal(self):
         """
         Draws two cards per player.
         """
@@ -302,6 +302,12 @@ class Poker(object):
         """
         community_stack = self._community_stack
         print(f"Community cards: {', '.join([str(card) for card in community_stack])}")
+
+    def get_player_stacks(self):
+        return self._player_stacks
+
+    def get_community_stack(self):
+        return self._community_stack
 
     def _print_money_standing(self, num_players: int):
         """
@@ -391,7 +397,7 @@ class Poker(object):
 
         """ ************************** INITIAL DEAL ************************** """
 
-        self._initial_deal()
+        self.initial_deal()
         for player_idx in range(self._num_players):
             self._print_player_stack(player_idx)
         while not all(self._player_dones):                          # While not everyone is done
