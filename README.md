@@ -27,7 +27,9 @@ for this project.
 ![img_2.png](img_2.png)
 
 You are now ready to play the game. As a player, you will perform your commands by publishing certain messages
-on specific topic channels. The next section will show how it's done. 
+on specific topic channels. For every message you publish, the topic should be "game_command". 
+Also make sure that the message type is set to `raw`. The next section will show you the message formats for
+different commands you wish to perform.
 
 If you'd just like a quick simulation instead,
 skip the next section and go straight to section **Example Game Simulation**.
@@ -36,7 +38,8 @@ skip the next section and go straight to section **Example Game Simulation**.
 As you can see from the screenshot above, you can configure which topics to publish to, write your messages in the
 input box at the bottom right, and `Publish` the messages. Here I will explain the strict protocol you must follow.
 
-For every message you publish, the topic should be "game_command". Also make sure that the message type is set to `raw`.
+Again, for every message you publish, the topic should be "game_command". 
+Also make sure that the message type is set to `raw`.
 
 ### 1. create_game
     Creates a game according to user input parameters, and adds the game to the game database.
