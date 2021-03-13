@@ -36,7 +36,7 @@ skip the next section and go straight to section **Example Game Simulation**.
 As you can see from the screenshot above, you can configure which topics to publish to, write your messages in the
 input box at the bottom right, and `Publish` the messages. Here I will explain the strict protocol you must follow.
 
-For every message you publish, the topic should be "game_command". The topic name you publish to isn't necessarily relevant to how the code will work, but let's keep it consistent.
+For every message you publish, the topic should be "game_command". Also make sure that the message type is set to `raw`.
 
 ### 1. create_game
     Creates a game according to user input parameters, and adds the game to the game database.

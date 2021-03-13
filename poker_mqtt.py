@@ -12,7 +12,7 @@ async def message_handler():
     Runs the MQTT client and handles messages via topic filters.
     """
     async with Client("localhost") as client:
-        await client.subscribe("#")
+        await client.subscribe("game_command")
         async with client.unfiltered_messages() as messages:
             async for message in messages:
                 message_str = message.payload.decode()
