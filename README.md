@@ -149,6 +149,15 @@ winner, the winning hand type, and its score:
 
 
 ## Scoring
+Card numbers higher than 10 have the following rank:
+
+| Card Number  |  Rank  |
+| ------------ | ------ |
+| 11           | Jack   |
+| 12           | Queen  |
+| 13           | King   |
+| 14           | Ace    | 
+
 The score will be calculated to the following metrics:
 
 | Hand Type        | Score      |
