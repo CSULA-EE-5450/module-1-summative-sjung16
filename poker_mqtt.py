@@ -78,12 +78,13 @@ async def create_game(client, message_params):
                                 starting_cash=int(message_split[2]))
         game_info = await POKER_DB.get_game_info(message_split[0])
         await client.publish(("game_rooms/" + str(message_split[0])) + "/num_players", game_info.num_players, qos=1)
-        await client.publish(("game_rooms/" + str(message_split[0])) + "/starting_cash", game_info.starting_cash, qos=1)
+        await client.publish(("game_rooms/" + str(message_split[0])) + "/starting_cash",
+                             "$" + str(game_info.starting_cash), qos=1)
         await client.publish(("game_rooms/" + str(message_split[0])) + "/players", "", qos=1)
     except KeyError:
         await client.publish(("game_rooms/" + str(message_split[0])) + "/error",
-                             "Please enter message in correct format!", qos=1)
-        raise MqttError("Please enter message in correct format!")
+                             "Please enter message in the correct format!", qos=1)
+        raise MqttError("Please enter message in the correct format!")
 
 
 async def add_player_to_game(client, message_params):
@@ -154,6 +155,8 @@ async def init_game(client, room_number):
     Topic: "game_command"
     Message format: "init_game room_number"
 
+    Example: To do the initial deal for game room 2, the user would publish "init_game 2" under topic "game_command".
+
     :param client: The MQTT client
     :param room_number: The room number
     """
@@ -162,10 +165,15 @@ async def init_game(client, room_number):
     game_info = await POKER_DB.get_game_info(room_number)
     player_list = game_info.players
     player_stacks = the_game.get_player_stacks()
+    player_cash = the_game.get_player_cash()
     for player in player_list:
         player_idx = await get_player_idx(room_number, player)
         await client.publish("game_rooms/" + room_number + "/players/" + player + "/hand",
                              str(player_stacks[player_idx]), qos=1)
+        await client.publish("game_rooms/" + room_number + "/players/" + player + "/cash",
+                             "$"+str(player_cash[player_idx]), qos=1)
+    await client.publish("game_rooms/" + room_number + "/community_cards_and_pot/the_pot",
+                         "$0", qos=1)
 
 
 async def main():
