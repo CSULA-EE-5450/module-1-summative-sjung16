@@ -357,8 +357,8 @@ class Poker(object):
         Creates a nested dictionary of each player and their best hand (along with their hand type and score), and
         returns the winning player's index number.
 
-        player_best_hands = {player 1: {'hand': hand 1, 'hand type': hand type 1, 'score': score 1},
-                             player 2: {'hand': hand 2, 'hand type': hand type 2, 'score': score 2}, ...}
+        _best_hands = {player 1: {'hand': hand 1, 'hand type': hand type 1, 'score': score 1},
+                       player 2: {'hand': hand 2, 'hand type': hand type 2, 'score': score 2}, ...}
 
         :return: The winning player
         """

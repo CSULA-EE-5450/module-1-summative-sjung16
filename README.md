@@ -1,10 +1,17 @@
 # Texas Hold'em in MQTT (ee5450-module-1-summative)
-## Project Overview
 Welcome to Texas Hold'em! This is a popular variant of Poker with community cards.
+For those unfamiliar with the game, here's a link on
+[how to play Texas Hold'em](https://bicyclecards.com/how-to-play/texas-holdem-poker/).
+This project aims to play Texas Hold'em using the MQTT subscribe-publish protocol.
 
-[How to play Texas Hold'em](https://bicyclecards.com/how-to-play/texas-holdem-poker/)
+## Table of Contents
+[Installation](#installation)
 
-This project aims to play Texas Hold'em using the MQTT subscribe-publish protocol. To do so, we must install some
+[Game Commands using MQTT Explorer](#game-commands-using-mqtt-explorer)
+
+## Installation
+
+ To do so, we must install some
 prerequisites:
 - For the MQTT broker, download the [Mosquitto broker](https://mosquitto.org/download/).
 - To run the server client on Pycharm, install [asyncio-mqtt](https://github.com/sbtinstruments/asyncio-mqtt) with 
@@ -13,7 +20,7 @@ prerequisites:
 - To simulate a user client, download [MQTT Explorer](http://mqtt-explorer.com/).
 
 Once finished with the installations:
-- Run `poker_mqtt`. This will run the client indefinitely.
+- Run `poker_mqtt` on Pycharm. This will run the client indefinitely.
   Note that the server will be run on 'localhost' by default, but this can be changed on line 14.
 - Run MQTT Explorer. Click on `+ Connections`, and set the name and the host to "localhost" as shown, and
    click `Connect`:
