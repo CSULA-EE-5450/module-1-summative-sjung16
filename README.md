@@ -19,9 +19,7 @@ This project aims to play Texas Hold'em using the MQTT subscribe-publish protoco
 - [Scoring](#scoring)
 
 ## Installation
-
- To do so, we must install some
-prerequisites:
+We must install some prerequisites:
 - For the MQTT broker, download the [Mosquitto broker](https://mosquitto.org/download/).
 - To run the server client on Pycharm, install [asyncio-mqtt](https://github.com/sbtinstruments/asyncio-mqtt) with 
   `pip install asyncio-mqtt`. This is an MQTT protocol based on paho-mqtt 
@@ -30,7 +28,7 @@ prerequisites:
 
 Once finished with the installations:
 - Run `poker_mqtt` on Pycharm. This will run the client indefinitely.
-  Note that the server will be run on 'localhost' by default, but this can be changed on line 14.
+  Note that the server will be run on 'localhost' by default, but this can be changed on line 14 of the code.
 - Run MQTT Explorer. Click on `+ Connections`, and set the name and the host to "localhost" as shown, and
    click `Connect`:
   
