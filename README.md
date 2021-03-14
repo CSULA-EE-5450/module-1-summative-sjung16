@@ -5,9 +5,18 @@ For those unfamiliar with the game, here's a link on
 This project aims to play Texas Hold'em using the MQTT subscribe-publish protocol.
 
 ## Table of Contents
-[Installation](#installation)
-
-[Game Commands using MQTT Explorer](#game-commands-using-mqtt-explorer)
+- [Installation](#installation)
+- [Game Commands using MQTT Explorer](#game-commands-using-mqtt-explorer)
+    1. [create_game](#1-create_game)
+    2. [create_user](#2-create_user)
+    3. [add_player_to_game](#3-add_player_to_game)
+    4. [init_game](#4-init_game)
+    5. [bet](#5-bet)
+    6. [the_flop](#6-the_flop)
+    7. [the_turn](#7-the_turn)
+    8. [the_river](#8-the_river)
+- [Example Game Simulation](#example-game-simulation)
+- [Scoring](#scoring)
 
 ## Installation
 
