@@ -52,30 +52,6 @@ async def message_handler():
                     await the_river(client, message_params)
 
 
-async def create_user(client, message_params):
-    """
-    Adds a user with the input username to the user database, with a randomly generated password.
-    The user must publish a message of his desired username under the designated topic and message format below.
-
-    Topic: "game_command"
-    Message format: "create_user username"
-
-    Example: User publishes string message "create_user john_doe" under topic "user_command/create" to create a new
-             user with username john_doe
-
-    :param client: The MQTT client
-    :param message_params: The parameters portion of the message string
-    :return: The username and the password
-    """
-    try:
-        new_username, new_password = USER_DB.create_user(message_params)
-    except ValueError:
-        await client.publish(("users/" + str(message_params) + "/error"),
-                             "That username already exists!", qos=1)
-        raise MqttError("That username already exists!")
-    await client.publish(("users/" + str(new_username) + "/create_success"), "True", qos=1)
-
-
 async def create_game(client, message_params):
     """
     Creates a game according to user input parameters, and adds the game to the game database.
@@ -104,6 +80,30 @@ async def create_game(client, message_params):
         await client.publish(("game_rooms/" + str(message_split[0])) + "/error",
                              "Please enter message in the correct format!", qos=1)
         raise MqttError("Please enter message in the correct format!")
+
+
+async def create_user(client, message_params):
+    """
+    Adds a user with the input username to the user database, with a randomly generated password.
+    The user must publish a message of his desired username under the designated topic and message format below.
+
+    Topic: "game_command"
+    Message format: "create_user username"
+
+    Example: User publishes string message "create_user john_doe" under topic "user_command/create" to create a new
+             user with username john_doe
+
+    :param client: The MQTT client
+    :param message_params: The parameters portion of the message string
+    :return: The username and the password
+    """
+    try:
+        new_username, new_password = USER_DB.create_user(message_params)
+    except ValueError:
+        await client.publish(("users/" + str(message_params) + "/error"),
+                             "That username already exists!", qos=1)
+        raise MqttError("That username already exists!")
+    await client.publish(("users/" + str(new_username) + "/create_success"), "True", qos=1)
 
 
 async def add_player_to_game(client, message_params):
