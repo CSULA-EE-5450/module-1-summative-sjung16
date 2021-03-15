@@ -83,7 +83,7 @@ async def create_game(client, message_params, test: bool):
             await client.publish(("game_rooms/" + str(message_split[0])) + "/error",
                                  "Please enter message in the correct format!", qos=1)
             raise MqttError("Please enter message in the correct format!")
-    if test:
+    else:
         test_str_1 = "game_rooms/" + str(message_split[0]) + "/num_players=" + str(game_info.num_players)
         test_str_2 = "game_rooms/" + str(message_split[0]) + "/starting_cash=" + "$" + str(game_info.starting_cash)
         test_str_3 = "game_rooms/" + str(message_split[0]) + "/players"
@@ -114,7 +114,7 @@ async def create_user(client, message_params, test: bool):
         raise MqttError("That username already exists!")
     if not test:
         await client.publish(("users/" + str(new_username) + "/create_success"), "True", qos=1)
-    if test:
+    else:
         return "users/" + str(new_username) + "/create_success=True"
 
 
@@ -151,7 +151,7 @@ async def add_player_to_game(client, message_params, test: bool):
     if not test:
         await client.publish("game_rooms/" + str(room_number) + "/players/" + str(username),
                              "player_idx: "+str(player_idx), qos=1)
-    if test:
+    else:
         return "game_rooms/" + str(room_number) + "/players/" + str(username) + "=" + "player_idx: " + str(player_idx)
 
 
@@ -182,7 +182,7 @@ async def get_player_idx(room_number, username):
     return player_idx
 
 
-async def init_game(client, room_number):
+async def init_game(client, room_number, test: bool):
     """
     Deals the initial hands for each player.
 
@@ -208,11 +208,13 @@ async def init_game(client, room_number):
                              str(player_stacks[player_idx]), qos=1)
         await client.publish("game_rooms/" + room_number + "/players/" + player + "/cash",
                              "$"+str(player_cash[player_idx]), qos=1)
-    await client.publish("game_rooms/" + room_number + "/community_cards_and_pot/the_pot",
-                         "$0", qos=1)
+    if not test:
+        await client.publish("game_rooms/" + room_number + "/community_cards_and_pot/the_pot", "$0", qos=1)
+    else:
+        return "game_rooms/" + room_number + "/community_cards_and_pot/the_pot=$0"
 
 
-async def bet(client, message_params):
+async def bet(client, message_params, test: bool):
     """
     Deals the initial hands for each player.
 
@@ -223,6 +225,7 @@ async def bet(client, message_params):
 
     :param client: The MQTT client
     :param message_params: The parameters portion of the message string
+    :param test: Test mode enable/disable
     """
     # Split message_params into three parameters
     message_split = message_params.split(",")
@@ -238,10 +241,15 @@ async def bet(client, message_params):
     # Money flow
     player_cash[player_idx] -= bet_amount
     the_game.the_pot += bet_amount
-    await client.publish("game_rooms/" + room_number + "/players/" + username + "/cash",
-                         "$" + str(player_cash[player_idx]), qos=1)
-    await client.publish("game_rooms/" + room_number + "/community_cards_and_pot/the_pot",
-                         str(the_game.the_pot), qos=1)
+    if not test:
+        await client.publish("game_rooms/" + room_number + "/players/" + username + "/cash",
+                             "$" + str(player_cash[player_idx]), qos=1)
+        await client.publish("game_rooms/" + room_number + "/community_cards_and_pot/the_pot",
+                             str(the_game.the_pot), qos=1)
+    else:
+        test_player_cash = "game_rooms/2/players/player1/cash=$" + str(player_cash[player_idx])
+        test_the_pot = "game_rooms/2/community_cards_and_pot/the_pot=" + str(the_game.the_pot)
+        return test_player_cash, test_the_pot
 
 
 async def the_flop(client, room_number):

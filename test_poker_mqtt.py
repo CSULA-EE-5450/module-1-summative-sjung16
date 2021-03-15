@@ -40,10 +40,21 @@ async def test_add_player_to_game():
         assert test_response == "game_rooms/2/players/player1=player_idx: 0"
 
 
-# @pytest.mark.asyncio
-# async def bet():
-#     async with Client("localhost") as client:
-#         await create_sample_game()
-#         test_message = "bet 2,felix,200"
-#         test_response = await poker_mqtt.get_game(client, test_message, test=True)
-#         assert test_response == "game_rooms/2/players/player1=player_idx: 0"
+@pytest.mark.asyncio
+async def test_init_game():
+    async with Client("localhost") as client:
+        await create_sample_game()
+        test_message = "2"
+        test_response = await poker_mqtt.init_game(client, test_message, test=True)
+        assert test_response == "game_rooms/2/community_cards_and_pot/the_pot=$0"
+
+
+@pytest.mark.asyncio
+async def test_bet():
+    async with Client("localhost") as client:
+        await create_sample_game()
+        await poker_mqtt.add_player_to_game(client, "2,player1", test=True)
+        test_message = "2,player1,200"
+        test_response_1, test_response_2 = await poker_mqtt.bet(client, test_message, test=True)
+        assert test_response_1 == "game_rooms/2/players/player1/cash=$4800"
+        assert test_response_2 == "game_rooms/2/community_cards_and_pot/the_pot=200"
