@@ -21,15 +21,15 @@ async def message_handler():
                     # Delete the command portion of the message ("create_user")
                     message_params = message_str.replace("create_user", '')
                     # Then feed the remaining message of only the parameter(s) (username).
-                    await create_user(client, message_params)
+                    await create_user(client, message_params, test=False)
 
                 elif message_str.startswith("create_game"):
                     message_params = message_str.replace("create_game", '')
-                    await create_game(client, message_params)
+                    await create_game(client, message_params, test=False)
 
                 elif message_str.startswith("add_player_to_game"):
                     message_params = message_str.replace("add_player_to_game", '')
-                    await add_player_to_game(client, message_params)
+                    await add_player_to_game(client, message_params, test=False)
 
                 elif message_str.startswith("init_game"):
                     message_params = message_str.replace("init_game", '')
@@ -52,7 +52,7 @@ async def message_handler():
                     await the_river(client, message_params)
 
 
-async def create_game(client, message_params):
+async def create_game(client, message_params, test: bool):
     """
     Creates a game according to user input parameters, and adds the game to the game database.
 
@@ -65,24 +65,32 @@ async def create_game(client, message_params):
 
     :param client: The MQTT client
     :param message_params: The parameters portion of the message string
+    :param test: Test mode enable/disable
     """
+
     message_split = message_params.split(",")
-    try:
-        await POKER_DB.add_game(room_number=str(message_split[0]),
-                                num_players=int(message_split[1]),
-                                starting_cash=int(message_split[2]))
-        game_info = await POKER_DB.get_game_info(message_split[0])
-        await client.publish(("game_rooms/" + str(message_split[0])) + "/num_players", game_info.num_players, qos=1)
-        await client.publish(("game_rooms/" + str(message_split[0])) + "/starting_cash",
-                             "$" + str(game_info.starting_cash), qos=1)
-        await client.publish(("game_rooms/" + str(message_split[0])) + "/players", "", qos=1)
-    except KeyError:
-        await client.publish(("game_rooms/" + str(message_split[0])) + "/error",
-                             "Please enter message in the correct format!", qos=1)
-        raise MqttError("Please enter message in the correct format!")
+    await POKER_DB.add_game(room_number=str(message_split[0]),
+                            num_players=int(message_split[1]),
+                            starting_cash=int(message_split[2]))
+    game_info = await POKER_DB.get_game_info(message_split[0])
+    if not test:
+        try:
+            await client.publish(("game_rooms/" + str(message_split[0])) + "/num_players", game_info.num_players, qos=1)
+            await client.publish(("game_rooms/" + str(message_split[0])) + "/starting_cash",
+                                 "$" + str(game_info.starting_cash), qos=1)
+            await client.publish(("game_rooms/" + str(message_split[0])) + "/players", "", qos=1)
+        except KeyError:
+            await client.publish(("game_rooms/" + str(message_split[0])) + "/error",
+                                 "Please enter message in the correct format!", qos=1)
+            raise MqttError("Please enter message in the correct format!")
+    if test:
+        test_str_1 = "game_rooms/" + str(message_split[0]) + "/num_players=" + str(game_info.num_players)
+        test_str_2 = "game_rooms/" + str(message_split[0]) + "/starting_cash=" + "$" + str(game_info.starting_cash)
+        test_str_3 = "game_rooms/" + str(message_split[0]) + "/players"
+        return test_str_1, test_str_2, test_str_3
 
 
-async def create_user(client, message_params):
+async def create_user(client, message_params, test: bool):
     """
     Adds a user with the input username to the user database, with a randomly generated password.
     The user must publish a message of his desired username under the designated topic and message format below.
@@ -95,6 +103,7 @@ async def create_user(client, message_params):
 
     :param client: The MQTT client
     :param message_params: The parameters portion of the message string
+    :param test: Test mode enable/disable
     :return: The username and the password
     """
     try:
@@ -103,10 +112,13 @@ async def create_user(client, message_params):
         await client.publish(("users/" + str(message_params) + "/error"),
                              "That username already exists!", qos=1)
         raise MqttError("That username already exists!")
-    await client.publish(("users/" + str(new_username) + "/create_success"), "True", qos=1)
+    if not test:
+        await client.publish(("users/" + str(new_username) + "/create_success"), "True", qos=1)
+    if test:
+        return "users/" + str(new_username) + "/create_success=True"
 
 
-async def add_player_to_game(client, message_params):
+async def add_player_to_game(client, message_params, test: bool):
     """
     Adds a player to a game that exists in the database.
 
@@ -119,6 +131,7 @@ async def add_player_to_game(client, message_params):
 
     :param client: The MQTT client
     :param message_params: The parameters portion of the message string
+    :param test: Test mode enable/disable
     """
     message_split = message_params.split(",")
     room_number = message_split[0]
@@ -135,8 +148,11 @@ async def add_player_to_game(client, message_params):
         raise MqttError("Room is full; cannot add player!")
     player_list.append(username)
     player_idx = player_list.index(username)
-    await client.publish("game_rooms/" + str(room_number) + "/players/" + str(username),
-                         "player_idx: "+str(player_idx), qos=1)
+    if not test:
+        await client.publish("game_rooms/" + str(room_number) + "/players/" + str(username),
+                             "player_idx: "+str(player_idx), qos=1)
+    if test:
+        return "game_rooms/" + str(room_number) + "/players/" + str(username) + "=" + "player_idx: " + str(player_idx)
 
 
 async def get_game(room_number):
@@ -177,6 +193,7 @@ async def init_game(client, room_number):
 
     :param client: The MQTT client
     :param room_number: The room number
+    :param test: Test mode enable/disable
     """
     the_game = await get_game(room_number)
     the_game.initial_deal()
@@ -191,7 +208,6 @@ async def init_game(client, room_number):
                              str(player_stacks[player_idx]), qos=1)
         await client.publish("game_rooms/" + room_number + "/players/" + player + "/cash",
                              "$"+str(player_cash[player_idx]), qos=1)
-
     await client.publish("game_rooms/" + room_number + "/community_cards_and_pot/the_pot",
                          "$0", qos=1)
 
@@ -323,4 +339,7 @@ async def main():
 # Change to the "Selector" event loop
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 # Run your async application as usual
-asyncio.run(main())
+if __name__ == '__main__':
+    asyncio.run(main())
+
+
