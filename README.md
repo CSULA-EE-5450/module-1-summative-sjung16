@@ -62,7 +62,7 @@ Also make sure that the message type is set to `raw`.
     Message format: "create_game game_number, num_players, starting_cash" (Important: the three parameters MUST be
                     separated by a comma!"
 
-    Example: User publishes string message "create_game 2, 3, 5000" under topic "game_command/create" to create a 
+    Example: User publishes string message "create_game 2, 3, 5000" under topic "game_command" to create a 
              new game with room_number=2, num_players=3, and starting_cash=5000
 After clicking `Publish`, it should look like this:
 
